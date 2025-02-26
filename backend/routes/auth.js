@@ -29,16 +29,19 @@ router.post('/student/login', async (req, res) => {
     const { username, password } = req.body;
     const student = await Student.findOne({ username });
     if (!student) {
+      console.log('Student not found');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const isPasswordValid = await student.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password not valid');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ userId: student._id, role: 'student' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    res.status(201).json({ message: 'Student login successful', token: token });
   }
   catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -67,16 +70,19 @@ router.post('/owner/login', async (req, res) => {
     const { username, password } = req.body;
     const owner = await Owner.findOne({ username });
     if (!owner) {
+      console.log('Owner not found');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const isPasswordValid = await owner.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password not valid');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ userId: owner._id, role: 'owner' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
+    res.status(201).json({ message: 'Owner login successful', token: token  });
   }
   catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: err.message });
   }
 });

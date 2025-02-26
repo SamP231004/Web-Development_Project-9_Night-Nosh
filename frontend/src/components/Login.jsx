@@ -12,13 +12,16 @@ const Login = ({ setToken }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`/auth/${role}/login`, { username, password });
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/${role}/login`, { username, password });
             setToken(response.data.token);
             localStorage.setItem('token', response.data.token);
+            console.log(response.data.token)
             navigate(`/${role}`);
+            console.log(`Navigated to /${role}`);
         }
         catch (err) {
             setError(err.response?.data?.message || 'Login failed');
+            console.log(err);
         }
     };
 

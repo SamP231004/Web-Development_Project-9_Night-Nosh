@@ -21,6 +21,9 @@ const reservationRoutes = require('./routes/reservation');
 app.use('/api/stock', stockRoutes);
 app.use('/api/reservations', reservationRoutes);
 
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
