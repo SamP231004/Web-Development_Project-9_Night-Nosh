@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const StockList = () => {
     const [stock, setStock] = useState([]);
-    const [block, setBlock] = useState('G Block');
+    const [block, setBlock] = useState('A Block');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     useEffect(() => {
@@ -30,7 +30,6 @@ const StockList = () => {
                     <option value="A Block">A Block</option>
                     <option value="B Block">B Block</option>
                     <option value="C Block">C Block</option>
-                    <option value="G Block">G Block</option>
                     {/* Add more blocks as needed */}
                 </select>
             </div>
@@ -48,7 +47,7 @@ const StockList = () => {
             <ul>
                 {stock.map((item) => (
                     <li key={item._id}>
-                        {item.itemName} - ${item.price} - Quantity: {item.quantity}
+                        {item.itemName} : Rs {item.price} | Quantity : {item.quantity}
                     </li>
                 ))}
             </ul>

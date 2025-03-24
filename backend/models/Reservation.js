@@ -26,6 +26,9 @@ const ReservationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  paymentIntentId: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model('Reservation', ReservationSchema);
