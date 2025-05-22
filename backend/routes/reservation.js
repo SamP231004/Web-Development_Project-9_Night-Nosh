@@ -30,7 +30,6 @@ router.post('/', authMiddleware, [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-
         // Check if stock exists and has enough quantity
         const stock = await Stock.findById(req.body.itemId);
         if (!stock) {
@@ -53,59 +52,6 @@ router.post('/', authMiddleware, [
         res.status(201).json(savedReservation);
     } catch (err) {
         res.status(400).json({ message: err.message });
-    }
-});
-
-// Mark reservation as paid
-router.put('/mark-paid/:id', authMiddleware, async (req, res) => {
-    try {
-        const reservation = await Reservation.findById(req.params.id);
-        if (!reservation) {
-            return res.status(404).json({ message: 'Reservation not found' });
-        }
-
-        // Check if already paid
-        if (reservation.paymentStatus === 'paid') {
-            return res.status(400).json({ 
-                message: 'Reservation is already paid',
-                success: false
-            });
-        }
-
-        // Check if stock exists and has enough quantity
-        const stock = await Stock.findById(reservation.itemId);
-        if (!stock) {
-            return res.status(404).json({ 
-                message: 'Stock item not found',
-                success: false
-            });
-        }
-
-        if (stock.quantity < reservation.quantityReserved) {
-            return res.status(400).json({ 
-                message: 'Insufficient stock',
-                success: false
-            });
-        }
-
-        // Update reservation status
-        reservation.paymentStatus = 'paid';
-        await reservation.save();
-
-        // Decrement stock
-        stock.quantity -= reservation.quantityReserved;
-        await stock.save();
-
-        res.json({ 
-            message: 'Payment processed successfully',
-            success: true,
-            reservation 
-        });
-    } catch (err) {
-        res.status(500).json({ 
-            message: err.message,
-            success: false
-        });
     }
 });
 

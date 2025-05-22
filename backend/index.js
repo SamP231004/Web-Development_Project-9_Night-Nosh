@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
-const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
@@ -18,20 +17,19 @@ const limiter = rateLimit({
 app.use(helmet());
 app.use(limiter);
 
-// Allowed origins
-const allowedOrigins = [
-    'http://localhost:3000',  // React CRA
-    'http://localhost:5173',  // Vite
-    'http://127.0.0.1:5173',  // Sometimes Vite uses this
-];
-
 // CORS Middleware with improved security
 app.use(cors({
     origin: function(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow all origins if CORS_ORIGIN is set to '*'
+        if (process.env.CORS_ORIGIN === '*' || !origin) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            const allowedOrigins = process.env.CORS_ORIGIN.split(','); // Split by comma if multiple origins are provided
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
         }
     },
     credentials: true,
@@ -41,7 +39,6 @@ app.use(cors({
 
 // Body parser middleware with size limits
 app.use(express.json({ limit: '10kb' }));
-app.use(bodyParser.json({ limit: '10kb' }));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -58,7 +55,7 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    autoIndex: true,
+    autoIndex: false, // Set to false in production
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
 });
@@ -86,6 +83,7 @@ app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
+// Start the server
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

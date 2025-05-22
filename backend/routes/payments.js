@@ -13,7 +13,9 @@ router.post('/create-checkout-session', async (req, res) => {
         }));
         const reservationIds = reservationData.map(r => r._id);
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'], line_items: lineItems, mode: 'payment',
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/reservation-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${process.env.FRONTEND_URL}/reservation-cancel`,
             metadata: { reservationIds: JSON.stringify(reservationIds), },
@@ -28,7 +30,6 @@ router.post('/create-checkout-session', async (req, res) => {
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
-
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
@@ -85,36 +86,6 @@ router.get('/payments/session/:sessionId', async (req, res) => {
         console.error('Error fetching Stripe session:', error);
         console.error('Stripe error details:', error.message); // Add this line
         res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-router.get('/reservations/details/:reservationId', async (req, res) => {
-    try {
-        const reservation = await Reservation.findById(req.params.reservationId);
-        if (!reservation) {
-            return res.status(404).json({ error: 'Reservation not found' });
-        }
-        res.json(reservation);
-    } catch (error) {
-        console.error('Error fetching Reservation details:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-router.put('/reservations/mark-paid/:reservationId', async (req, res) => {
-    try {
-        const reservation = await Reservation.findByIdAndUpdate(
-            req.params.reservationId,
-            { paymentStatus: req.body.paymentStatus },
-            { new: true }
-        );
-        if (!reservation) {
-            return res.status(404).json({ success: false, message: 'Reservation not found' });
-        }
-        res.json({ success: true, message: 'Reservation status updated' });
-    } catch (error) {
-        console.error('Error updating reservation status:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
 
